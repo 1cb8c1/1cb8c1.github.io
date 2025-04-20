@@ -1,0 +1,28 @@
+{{ define "main" }}
+<article>
+<header class="article-header">
+    <address class="article-author">{{ .Params.author }}</address>
+    <time class="article-date" datetime="{{ .PublishDate }}">
+		{{ time.Format "January 2006" .PublishDate }}
+	</time>
+    <br/>
+    <br/>
+    <h1 class="article-title">
+        {{ .Title }}
+	</h1>
+    <br/>
+</header>
+{{ .Content }}
+
+
+<span aria-hidden="true">------------------------------------------------------------------------</span>
+{{ with .Params.tags }}
+<span><br/>Tags: 
+    {{ range . }}
+    [<a href="{{ "tags/" | relLangURL }}{{ . | urlize }}">{{ . }}</a>]
+    {{ end }}
+</span>
+<span aria-hidden="false"><br/><br/></span>
+{{ end }}
+</article>
+{{ end }}

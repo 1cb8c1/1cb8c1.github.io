@@ -1,0 +1,11 @@
+baseURL = 'https://1cb8c1.github.io/'
+languageCode = 'en-us'
+title = '1cb8c1'
+theme = 'rfc-like'
+
+[params]
+	description = "A blog about technology, security, and other topics.\nIts minimalistic styling is inspired by Request For Comments (RFC)\ndocuments and aims to follow RFC 7322 in certain guidelines.\nThis blog is authored by Bartłomiej Motyl (1cb8c1)."
+
+[caches]
+  [caches.images]
+    dir = ':cacheDir/images'

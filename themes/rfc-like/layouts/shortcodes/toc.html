@@ -1,0 +1,18 @@
+{{ $headers := findRESubmatch `(?m)^#{1,6}\s+(\d+(?:\.\d+)*\.)\s+(.*)$` .Inner }}
+
+<ul>{{ range $headers }}
+    <li>
+    {{ $number := index . 1 }}
+    {{ $title := index . 2 }}
+    {{ $numberNoDot := print $number | strings.TrimSuffix "." }}
+    {{ $anchor := print $number " " $title | anchorize }}
+    {{ $dotCount := sub 65 (add (len $number ) (len " ") (len $title))}}
+    <a href="#{{ $anchor }}" aria-label="{{ $number }} {{ $title }}">{{ $numberNoDot }}</a>.
+    <span class="list-title" aria-hidden="true">{{ $title }}</span>
+    {{ if gt $dotCount 0 }}
+        <span class="list-leader" aria-hidden="true">{{ strings.Repeat $dotCount "." }}</span>
+    {{ end }}
+    </li>
+{{ end }}</ul>
+
+{{ .Inner | markdownify }}

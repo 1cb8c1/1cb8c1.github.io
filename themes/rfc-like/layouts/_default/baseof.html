@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" style="background-color: rgb(16, 16, 16);">
+	<head>
+		<meta name="theme-color" content="#000">
+        <meta charset="utf-8">
+		<meta name="viewport" 
+		content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" type="text/css" 
+		href="{{ absURL `styles/style.css` }}">
+		<title>1cb8c1</title>
+	</head>
+	<body>
+	<nav>
+		<a class="{{ if eq .RelPermalink "/" }}active{{ end }}" href="/">Home</a>
+		<a class="{{ if eq .RelPermalink "/posts/" }}active{{ end }}" href="/posts">Posts</a>
+		<a class="{{ if eq .RelPermalink "/tags/" }}active{{ end }}" href="/tags">Tags</a>
+		<address class="nav-title">{{ .Site.Title }}</address>
+	</nav>
+    <span aria-hidden="true">------------------------------------------------------------------------<br/><br/></span>
+    {{ block "main" . }}
+	{{ end }}
+    </body>
+</html>

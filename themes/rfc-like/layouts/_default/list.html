@@ -1,0 +1,32 @@
+{{ define "main" }}
+<h1>Table of Contents</h1>
+<ul>
+{{ $pages := .Pages.ByPublishDate.Reverse }}
+{{ range $index, $page := $pages }}
+	<li>
+		<a href="{{ .RelPermalink }}" aria-label="{{ add $index 1 }}. {{ .Title }}">{{ add $index 1 }}</a>.
+		<span class="list-title" aria-hidden="true">{{ .Title }}</span>
+		{{ $indexStr := add $index 1 | string }}
+		{{ $titleLen := len .Title }}
+		{{ $indexLen := len $indexStr }}
+		{{ if .Params.Tags }}
+			{{ $dotCount := sub 50 (add $titleLen $indexLen) }}
+            <span class="list-leader" aria-hidden="true">
+				{{ strings.Repeat $dotCount "." }}	
+			</span>
+			<time class="list-date" dateTime=".PublishDate">
+				{{ time.Format "2006-01-02" .PublishDate }}
+			</time>
+        {{ else }}
+            {{ $pageLen := len .Pages }}
+            {{ $pageStrLen := len ( print $pageLen) }}
+            {{ $dotCount := sub 59 (add $titleLen $pageStrLen)}}
+            <span class="list-leader" aria-hidden="true">
+				{{ strings.Repeat $dotCount "." }}	
+			</span>
+            <span>{{ len .Pages }}</span>
+        {{ end }}
+	</li>
+{{ end }}
+</ul>
+{{ end }}

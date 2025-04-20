@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Security on 1cb8c1</title>
+    <link>http://localhost:1313/tags/security/</link>
+    <description>Recent content in Security on 1cb8c1</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 20 Apr 2025 20:00:00 +0100</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/security/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CTF - flaws2.cloud Attacker Level 1</title>
+      <link>http://localhost:1313/posts/flaws2-cloud-attacker-level-1/</link>
+      <pubDate>Sun, 20 Apr 2025 20:00:00 +0100</pubDate>
+      <guid>http://localhost:1313/posts/flaws2-cloud-attacker-level-1/</guid>
+      <description>Abstract In the &amp;lt;flaws2.cloud&amp;gt; Capture The FLag (CTF) attacker level 1 challenge, participants must bypass a 100 digit PIN requirement to progress. This document is a report of a an attempt to solve the mentioned CTF level. It provides an overview of the methods and steps taken to achieve the solution.&#xA;Status of This Memo This document is published for informational purposes. It serves as a recorded reference for the author&amp;rsquo;s attempt, helping to retain the steps taken.</description>
+    </item>
+  </channel>
+</rss>
